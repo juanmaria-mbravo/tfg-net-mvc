@@ -11,15 +11,18 @@ public class Item
 
     public Item(string name, string? description, int stock)
     {
-        if (string.IsNullOrWhiteSpace(name))
-            throw new ArgumentException("Name is required.");
+        SetName(name);
+        SetStock(stock);
 
-        if (stock < 0)
-            throw new ArgumentException("Stock cannot be negative.");
-
-        Name = name.Trim();
         Description = description;
-        Stock = stock;
+    }
+
+    public void Update(string name, string? description, int stock)
+    {
+        SetName(name);
+        SetStock(stock);
+
+        Description = description;
     }
 
     public void AddStock(int quantity)
@@ -39,5 +42,21 @@ public class Item
             throw new InvalidOperationException("Not enough stock.");
 
         Stock -= quantity;
+    }
+
+    private void SetName(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+            throw new ArgumentException("Name is required.");
+
+        Name = name.Trim();
+    }
+
+    private void SetStock(int stock)
+    {
+        if (stock < 0)
+            throw new ArgumentException("Stock cannot be negative.");
+
+        Stock = stock;
     }
 }
