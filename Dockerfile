@@ -1,13 +1,12 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
-COPY TfgNetMvc.sln ./
 COPY TfgNetMvc.Web/TfgNetMvc.Web.csproj TfgNetMvc.Web/
 COPY TfgNetMvc.Application/TfgNetMvc.Application.csproj TfgNetMvc.Application/
 COPY TfgNetMvc.Domain/TfgNetMvc.Domain.csproj TfgNetMvc.Domain/
 COPY TfgNetMvc.Infrastructure/TfgNetMvc.Infrastructure.csproj TfgNetMvc.Infrastructure/
 
-RUN dotnet restore TfgNetMvc.sln
+RUN dotnet restore TfgNetMvc.Web/TfgNetMvc.Web.csproj
 
 COPY . .
 
