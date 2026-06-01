@@ -1,13 +1,13 @@
 using System.Net;
-using Microsoft.AspNetCore.Mvc.Testing;
+using TfgNetMvc.Tests.Integration.Factories;
 
 namespace TfgNetMvc.Tests.Integration;
 
-public class ItemsIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
+public class ItemsIntegrationTests : IClassFixture<CustomWebApplicationFactory>
 {
     private readonly HttpClient _client;
 
-    public ItemsIntegrationTests(WebApplicationFactory<Program> factory)
+    public ItemsIntegrationTests(CustomWebApplicationFactory factory)
     {
         _client = factory.CreateClient();
     }
