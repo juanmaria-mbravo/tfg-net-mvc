@@ -164,11 +164,14 @@ Esto permite probar la lógica de aplicación sin depender de SQL Server ni de E
 
 Se utiliza `WebApplicationFactory<Program>` para levantar la aplicación en memoria y validar endpoints MVC.
 
-Para permitir estos tests, `Program.cs` incluye:
+Para permitir estos tests, `Program.cs` incluye una declaración parcial pública de la clase `Program`:
 
 ```csharp
 public partial class Program { }
 ```
+
+En el entorno de integración continua, estos tests utilizan una configuración específica mediante `CustomWebApplicationFactory`, sustituyendo la conexión real a SQL Server LocalDB por una base de datos en memoria con EF Core InMemory. Esto permite ejecutar los tests de integración en GitHub Actions sin depender de infraestructura local de Windows.
+
 
 ## CI/CD
 
