@@ -1,3 +1,4 @@
+using TfgNetMvc.Application.DTOs.Items;
 using TfgNetMvc.Application.Interfaces.Repositories;
 
 namespace TfgNetMvc.Application.UseCases.Items;
@@ -11,17 +12,17 @@ public class UpdateItem
         _repository = repository;
     }
 
-    public async Task<bool> ExecuteAsync(int id, string name, string? description, int stock)
+    public async Task<bool> ExecuteAsync(UpdateItemDto dto, CancellationToken cancellationToken = default)
     {
-        var item = await _repository.GetByIdAsync(id);
+        var item = await _repository.GetByIdAsync(dto.Id, cancellationToken);
 
         if (item is null)
             return false;
 
-        item.Update(name, description, stock);
+        item.Update(dto.Name, dto.Description, dto.Stock);
 
         _repository.Update(item);
-        await _repository.SaveChangesAsync();
+        await _repository.SaveChangesAsync(cancellationToken);
 
         return true;
     }

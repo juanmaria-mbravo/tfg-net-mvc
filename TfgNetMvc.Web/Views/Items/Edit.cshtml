@@ -1,4 +1,4 @@
-@model TfgNetMvc.Domain.Entities.Item
+@model TfgNetMvc.Web.ViewModels.Items.EditItemViewModel
 
 @{
     ViewData["Title"] = "Edit Item";
@@ -9,21 +9,24 @@
 <form asp-action="Edit" method="post">
     @Html.AntiForgeryToken()
 
-    <input type="hidden" name="id" value="@Model.Id" />
+    <input type="hidden" asp-for="Id" />
 
     <div class="mb-3">
-        <label for="name" class="form-label">Name</label>
-        <input name="name" id="name" class="form-control" value="@Model.Name" />
+        <label asp-for="Name" class="form-label"></label>
+        <input asp-for="Name" class="form-control" />
+        <span asp-validation-for="Name" class="text-danger"></span>
     </div>
 
     <div class="mb-3">
-        <label for="description" class="form-label">Description</label>
-        <textarea name="description" id="description" class="form-control">@Model.Description</textarea>
+        <label asp-for="Description" class="form-label"></label>
+        <textarea asp-for="Description" class="form-control"></textarea>
+        <span asp-validation-for="Description" class="text-danger"></span>
     </div>
 
     <div class="mb-3">
-        <label for="stock" class="form-label">Stock</label>
-        <input name="stock" id="stock" type="number" class="form-control" value="@Model.Stock" />
+        <label asp-for="Stock" class="form-label"></label>
+        <input asp-for="Stock" type="number" class="form-control" />
+        <span asp-validation-for="Stock" class="text-danger"></span>
     </div>
 
     <button type="submit" class="btn btn-primary">Save</button>

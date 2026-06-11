@@ -3,6 +3,8 @@ using TfgNetMvc.Infrastructure.Persistence;
 using TfgNetMvc.Application.Interfaces.Repositories;
 using TfgNetMvc.Infrastructure.Repositories;
 using TfgNetMvc.Application.UseCases.Items;
+using TfgNetMvc.Application.Mapping;
+using TfgNetMvc.Web.Mapping;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,6 +13,17 @@ builder.Services.AddControllersWithViews();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddAutoMapper(cfg =>
+{
+    cfg.AddProfile<DtoMappingProfile>();
+});
+
+builder.Services.AddAutoMapper(cfg =>
+{
+    cfg.AddProfile<DtoMappingProfile>();
+    cfg.AddProfile<ViewModelMappingProfile>();
+});
 
 builder.Services.AddScoped<IItemRepository, ItemRepository>();
 builder.Services.AddScoped<CreateItem>();

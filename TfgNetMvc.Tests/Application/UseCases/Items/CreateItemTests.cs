@@ -1,3 +1,4 @@
+using TfgNetMvc.Application.DTOs.Items;
 using TfgNetMvc.Application.UseCases.Items;
 using TfgNetMvc.Tests.Application.Fakes;
 
@@ -6,28 +7,41 @@ namespace TfgNetMvc.Tests.Application.UseCases.Items;
 public class CreateItemTests
 {
     [Fact]
-    public async Task ExecuteAsync_WithValidData_ShouldCreateItemAndReturnId()
+    public async Task ExecuteAsync_WithValidData_CreatesItem()
     {
         var repository = new FakeItemRepository();
         var useCase = new CreateItem(repository);
 
-        var id = await useCase.ExecuteAsync("Laptop", "Work laptop", 10);
+        var dto = new CreateItemDto
+        {
+            Name = "Test item",
+            Description = "Test description",
+            Stock = 10
+        };
 
-        var item = await repository.GetByIdAsync(id);
+        var id = await useCase.ExecuteAsync(dto);
 
-        Assert.NotNull(item);
-        Assert.Equal("Laptop", item.Name);
-        Assert.Equal("Work laptop", item.Description);
-        Assert.Equal(10, item.Stock);
+        var createdItem = await repository.GetByIdAsync(id);
+
+        Assert.NotNull(createdItem);
+        Assert.Equal("Test item", createdItem.Name);
+        Assert.Equal("Test description", createdItem.Description);
+        Assert.Equal(10, createdItem.Stock);
     }
 
     [Fact]
-    public async Task ExecuteAsync_WithInvalidName_ShouldThrowArgumentException()
+    public async Task ExecuteAsync_WithEmptyName_ThrowsArgumentException()
     {
         var repository = new FakeItemRepository();
         var useCase = new CreateItem(repository);
 
-        await Assert.ThrowsAsync<ArgumentException>(() =>
-            useCase.ExecuteAsync("", "Description", 10));
+        var dto = new CreateItemDto
+        {
+            Name = "",
+            Description = "Invalid item",
+            Stock = 10
+        };
+
+        await Assert.ThrowsAsync<ArgumentException>(() => useCase.ExecuteAsync(dto));
     }
 }

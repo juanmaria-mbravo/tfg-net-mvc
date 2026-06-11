@@ -1,3 +1,4 @@
+using TfgNetMvc.Application.DTOs.Items;
 using TfgNetMvc.Application.UseCases.Items;
 using TfgNetMvc.Domain.Entities;
 using TfgNetMvc.Tests.Application.Fakes;
@@ -7,32 +8,50 @@ namespace TfgNetMvc.Tests.Application.UseCases.Items;
 public class UpdateItemTests
 {
     [Fact]
-    public async Task ExecuteAsync_WithExistingItem_ShouldUpdateItem()
+    public async Task ExecuteAsync_WhenItemExists_UpdatesItem()
     {
         var repository = new FakeItemRepository();
-        var item = new Item("Laptop", "Work laptop", 10);
-        await repository.AddAsync(item);
+        var existingItem = new Item("Original item", "Original description", 5);
+
+        await repository.AddAsync(existingItem);
+        await repository.SaveChangesAsync();
 
         var useCase = new UpdateItem(repository);
 
-        var result = await useCase.ExecuteAsync(item.Id, "Monitor", "Updated description", 5);
+        var dto = new UpdateItemDto
+        {
+            Id = existingItem.Id,
+            Name = "Updated item",
+            Description = "Updated description",
+            Stock = 20
+        };
 
-        var updatedItem = await repository.GetByIdAsync(item.Id);
+        var result = await useCase.ExecuteAsync(dto);
+
+        var updatedItem = await repository.GetByIdAsync(existingItem.Id);
 
         Assert.True(result);
         Assert.NotNull(updatedItem);
-        Assert.Equal("Monitor", updatedItem.Name);
+        Assert.Equal("Updated item", updatedItem.Name);
         Assert.Equal("Updated description", updatedItem.Description);
-        Assert.Equal(5, updatedItem.Stock);
+        Assert.Equal(20, updatedItem.Stock);
     }
 
     [Fact]
-    public async Task ExecuteAsync_WithNonExistingItem_ShouldReturnFalse()
+    public async Task ExecuteAsync_WhenItemDoesNotExist_ReturnsFalse()
     {
         var repository = new FakeItemRepository();
         var useCase = new UpdateItem(repository);
 
-        var result = await useCase.ExecuteAsync(999, "Monitor", "Description", 5);
+        var dto = new UpdateItemDto
+        {
+            Id = 999,
+            Name = "Updated item",
+            Description = "Updated description",
+            Stock = 20
+        };
+
+        var result = await useCase.ExecuteAsync(dto);
 
         Assert.False(result);
     }

@@ -1,3 +1,5 @@
+@model TfgNetMvc.Web.ViewModels.Items.CreateItemViewModel
+
 @{
     ViewData["Title"] = "Create Item";
 }
@@ -8,20 +10,23 @@
     @Html.AntiForgeryToken()
 
     <div class="mb-3">
-        <label for="name" class="form-label">Name</label>
-        <input name="name" id="name" class="form-control" />
+        <label asp-for="Name" class="form-label"></label>
+        <input asp-for="Name" class="form-control" />
+        <span asp-validation-for="Name" class="text-danger"></span>
     </div>
 
     <div class="mb-3">
-        <label for="description" class="form-label">Description</label>
-        <textarea name="description" id="description" class="form-control"></textarea>
+        <label asp-for="Description" class="form-label"></label>
+        <textarea asp-for="Description" class="form-control"></textarea>
+        <span asp-validation-for="Description" class="text-danger"></span>
     </div>
 
     <div class="mb-3">
-        <label for="stock" class="form-label">Stock</label>
-        <input name="stock" id="stock" type="number" class="form-control" value="0" />
+        <label asp-for="Stock" class="form-label"></label>
+        <input asp-for="Stock" type="number" class="form-control" />
+        <span asp-validation-for="Stock" class="text-danger"></span>
     </div>
 
-    <button type="submit" class="btn btn-primary">Save</button>
+    <button type="submit" class="btn btn-primary">Create</button>
     <a asp-action="Index" class="btn btn-secondary">Back</a>
 </form>
