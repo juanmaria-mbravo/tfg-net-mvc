@@ -6,7 +6,7 @@ El objetivo principal del proyecto no es construir una aplicación funcionalment
 
 ## Estado actual
 
-Estado del proyecto: versión inicial en desarrollo.
+Estado del proyecto: versión `v0.2.0`.
 
 Actualmente el proyecto incluye:
 
@@ -14,6 +14,9 @@ Actualmente el proyecto incluye:
 - Arquitectura por capas.
 - Persistencia con Entity Framework Core Code First.
 - CRUD funcional de la entidad `Item` en entorno local.
+- Separación entre entidades de dominio, DTOs de aplicación y ViewModels de presentación.
+- Mapeo entre capas mediante AutoMapper.
+- Validaciones en ViewModels mediante DataAnnotations.
 - Tests unitarios y de integración.
 - Pipeline de CI con GitHub Actions.
 - Despliegue continuo en Render mediante Docker.
@@ -37,16 +40,28 @@ Contiene la capa de presentación MVC:
 
 - Controllers
 - Views
+- ViewModels
+- Perfiles de mapeo entre DTOs y ViewModels
 - Configuración de servicios
 - Configuración del pipeline HTTP
+
+Actualmente incluye ViewModels específicos para la entidad `Item`:
+
+- `ItemListViewModel`
+- `ItemDetailsViewModel`
+- `CreateItemViewModel`
+- `EditItemViewModel`
+
+El perfil `ViewModelMappingProfile` centraliza los mapeos entre los DTOs de la capa de aplicación y los ViewModels utilizados por las vistas MVC.
 
 ### TfgNetMvc.Application
 
 Contiene la lógica de aplicación:
 
 - Casos de uso
-- DTOs cuando sean necesarios
+- DTOs
 - Interfaces de repositorios
+- Perfiles de mapeo entre entidades de dominio y DTOs
 
 Actualmente incluye casos de uso para la entidad `Item`:
 
@@ -55,6 +70,14 @@ Actualmente incluye casos de uso para la entidad `Item`:
 - `GetItemById`
 - `UpdateItem`
 - `DeleteItem`
+
+También incluye DTOs específicos para separar los datos expuestos por la capa de aplicación respecto a la entidad de dominio:
+
+- `ItemDto`
+- `CreateItemDto`
+- `UpdateItemDto`
+
+El perfil `DtoMappingProfile` centraliza los mapeos entre entidades de dominio y DTOs de aplicación.
 
 ### TfgNetMvc.Domain
 
@@ -89,6 +112,47 @@ Contiene pruebas automatizadas:
 - Tests unitarios de dominio
 - Tests de casos de uso
 - Tests de integración con `WebApplicationFactory`
+
+## Patrón aplicado al CRUD de Items
+
+La entidad `Item` se implementa siguiendo una separación explícita entre capas:
+
+```text
+Views
+  -> ViewModels
+
+Controller
+  -> AutoMapper
+  -> DTOs
+
+Application
+  -> Use Cases
+  -> DTOs
+
+Domain
+  -> Entity Item
+  -> reglas de negocio
+
+Infrastructure
+  -> EF Core
+  -> Repository
+```
+
+Las vistas MVC no trabajan directamente con entidades de dominio ni con DTOs de aplicación, sino con ViewModels definidos en la capa Web.
+
+La vista `Index` utiliza específicamente:
+
+```csharp
+@model List<TfgNetMvc.Web.ViewModels.Items.ItemListViewModel>
+```
+
+El listado de Items muestra los campos:
+
+- `Name`
+- `Description`
+- `Stock`
+
+Las vistas de creación y edición utilizan ViewModels con validaciones mediante DataAnnotations. Los formularios están enlazados mediante Tag Helpers (`asp-for`) para mantener una relación explícita entre la vista y el ViewModel correspondiente.
 
 ## Requisitos técnicos
 
@@ -160,6 +224,8 @@ Validan los casos de uso utilizando un repositorio fake en memoria.
 
 Esto permite probar la lógica de aplicación sin depender de SQL Server ni de EF Core.
 
+Los casos de uso trabajan con DTOs de entrada y salida, lo que permite validar la lógica de aplicación sin acoplarla a los ViewModels de la capa Web.
+
 ### Tests de integración
 
 Se utiliza `WebApplicationFactory<Program>` para levantar la aplicación en memoria y validar endpoints MVC.
@@ -171,7 +237,6 @@ public partial class Program { }
 ```
 
 En el entorno de integración continua, estos tests utilizan una configuración específica mediante `CustomWebApplicationFactory`, sustituyendo la conexión real a SQL Server LocalDB por una base de datos en memoria con EF Core InMemory. Esto permite ejecutar los tests de integración en GitHub Actions sin depender de infraestructura local de Windows.
-
 
 ## CI/CD
 
@@ -228,13 +293,44 @@ feature/* -> develop -> main
 
 Actualmente Render despliega desde `develop`.
 
+## Versiones
+
+### v0.1.0
+
+Primera versión estable del proyecto.
+
+Incluye:
+
+- Arquitectura por capas.
+- CRUD funcional de la entidad `Item` en entorno local.
+- EF Core Code First con SQL Server LocalDB.
+- Tests unitarios y de integración.
+- Integración continua con GitHub Actions.
+- Despliegue continuo en Render mediante Docker.
+
+### v0.2.0
+
+Versión centrada en mejorar la separación de responsabilidades del CRUD de `Item`.
+
+Incluye:
+
+- DTOs en la capa Application.
+- ViewModels en la capa Web.
+- AutoMapper 16.1.1.
+- `DtoMappingProfile`.
+- `ViewModelMappingProfile`.
+- Adaptación del `ItemsController` para trabajar con ViewModels y mapear hacia DTOs.
+- Adaptación de vistas para trabajar con ViewModels tipados.
+- Validaciones mediante DataAnnotations en ViewModels.
+- Formularios enlazados mediante Tag Helpers (`asp-for`).
+- Inclusión de `Description` en `ItemListViewModel` y en el listado de Items.
+
 ## Próximos pasos
 
 Posibles siguientes tareas:
 
-- Preparar versión `v0.1.0`
-- Configurar base de datos de producción
-- Añadir una segunda entidad
-- Mejorar validaciones mediante DTOs/ViewModels
-- Ampliar documentación final del TFG
-- Estructurar memoria en LaTeX
+- Configurar base de datos de producción.
+- Añadir una segunda entidad.
+- Ampliar el patrón CRUD reutilizable a nuevas entidades.
+- Ampliar documentación final del TFG.
+- Estructurar memoria en LaTeX.
