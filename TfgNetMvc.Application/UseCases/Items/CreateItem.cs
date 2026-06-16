@@ -15,7 +15,7 @@ public class CreateItem
 
     public async Task<int> ExecuteAsync(CreateItemDto dto, CancellationToken cancellationToken = default)
     {
-        var item = new Item(dto.Name, dto.Description, dto.Stock);
+        var item = new Item(dto.Name, dto.Description, dto.Stock, dto.CategoryId);
 
         await _repository.AddAsync(item, cancellationToken);
         await _repository.SaveChangesAsync(cancellationToken);

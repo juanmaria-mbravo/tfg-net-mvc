@@ -1,10 +1,10 @@
-@model TfgNetMvc.Web.ViewModels.Items.CreateItemViewModel
+@model TfgNetMvc.Web.ViewModels.Categories.CreateCategoryViewModel
 
 @{
-    ViewData["Title"] = "Create Item";
+    ViewData["Title"] = "Create Category";
 }
 
-<h1>Create Item</h1>
+<h1>Create Category</h1>
 
 <form asp-action="Create" method="post">
     @Html.AntiForgeryToken()
@@ -19,19 +19,6 @@
         <label asp-for="Description" class="form-label"></label>
         <textarea asp-for="Description" class="form-control"></textarea>
         <span asp-validation-for="Description" class="text-danger"></span>
-    </div>
-
-    <div class="mb-3">
-        <label asp-for="Stock" class="form-label"></label>
-        <input asp-for="Stock" type="number" class="form-control" />
-        <span asp-validation-for="Stock" class="text-danger"></span>
-    </div>
-
-    <div class="mb-3">
-        <label asp-for="CategoryId" class="form-label"></label>
-        <select asp-for="CategoryId" asp-items="Model.Categories" class="form-control">
-            <option value="">-- No category --</option>
-        </select>
     </div>
 
     <button type="submit" class="btn btn-primary">Create</button>

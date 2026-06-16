@@ -6,23 +6,27 @@ public class Item
     public string Name { get; private set; } = default!;
     public string? Description { get; private set; }
     public int Stock { get; private set; }
+    public int? CategoryId { get; private set; }
+    public Category? Category { get; private set; }
 
     private Item() { }
 
-    public Item(string name, string? description, int stock)
+    public Item(string name, string? description, int stock, int? categoryId = null)
     {
         SetName(name);
         SetStock(stock);
 
         Description = description;
+        CategoryId = categoryId;
     }
 
-    public void Update(string name, string? description, int stock)
+    public void Update(string name, string? description, int stock, int? categoryId = null)
     {
         SetName(name);
         SetStock(stock);
 
         Description = description;
+        CategoryId = categoryId;
     }
 
     public void AddStock(int quantity)

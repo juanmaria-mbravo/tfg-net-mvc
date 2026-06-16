@@ -3,6 +3,7 @@ using TfgNetMvc.Infrastructure.Persistence;
 using TfgNetMvc.Application.Interfaces.Repositories;
 using TfgNetMvc.Infrastructure.Repositories;
 using TfgNetMvc.Application.UseCases.Items;
+using TfgNetMvc.Application.UseCases.Categories;
 using TfgNetMvc.Application.Mapping;
 using TfgNetMvc.Web.Mapping;
 
@@ -31,6 +32,13 @@ builder.Services.AddScoped<GetItems>();
 builder.Services.AddScoped<GetItemById>();
 builder.Services.AddScoped<UpdateItem>();
 builder.Services.AddScoped<DeleteItem>();
+
+builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+builder.Services.AddScoped<CreateCategory>();
+builder.Services.AddScoped<GetCategories>();
+builder.Services.AddScoped<GetCategoryById>();
+builder.Services.AddScoped<UpdateCategory>();
+builder.Services.AddScoped<DeleteCategory>();
 
 var app = builder.Build();
 

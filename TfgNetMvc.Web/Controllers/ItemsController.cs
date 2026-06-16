@@ -1,6 +1,8 @@
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using TfgNetMvc.Application.DTOs.Items;
+using TfgNetMvc.Application.UseCases.Categories;
 using TfgNetMvc.Application.UseCases.Items;
 using TfgNetMvc.Web.ViewModels.Items;
 
@@ -13,6 +15,7 @@ public class ItemsController : Controller
     private readonly CreateItem _createItem;
     private readonly UpdateItem _updateItem;
     private readonly DeleteItem _deleteItem;
+    private readonly GetCategories _getCategories;
     private readonly IMapper _mapper;
 
     public ItemsController(
@@ -21,6 +24,7 @@ public class ItemsController : Controller
         CreateItem createItem,
         UpdateItem updateItem,
         DeleteItem deleteItem,
+        GetCategories getCategories,
         IMapper mapper)
     {
         _getItems = getItems;
@@ -28,6 +32,7 @@ public class ItemsController : Controller
         _createItem = createItem;
         _updateItem = updateItem;
         _deleteItem = deleteItem;
+        _getCategories = getCategories;
         _mapper = mapper;
     }
 
@@ -51,9 +56,14 @@ public class ItemsController : Controller
         return View(viewModel);
     }
 
-    public IActionResult Create()
+    public async Task<IActionResult> Create()
     {
-        return View(new CreateItemViewModel());
+        var viewModel = new CreateItemViewModel
+        {
+            Categories = await BuildCategorySelectListAsync()
+        };
+
+        return View(viewModel);
     }
 
     [HttpPost]
@@ -61,7 +71,10 @@ public class ItemsController : Controller
     public async Task<IActionResult> Create(CreateItemViewModel viewModel)
     {
         if (!ModelState.IsValid)
+        {
+            viewModel.Categories = await BuildCategorySelectListAsync();
             return View(viewModel);
+        }
 
         var dto = _mapper.Map<CreateItemDto>(viewModel);
 
@@ -78,6 +91,7 @@ public class ItemsController : Controller
             return NotFound();
 
         var viewModel = _mapper.Map<EditItemViewModel>(item);
+        viewModel.Categories = await BuildCategorySelectListAsync();
 
         return View(viewModel);
     }
@@ -87,7 +101,10 @@ public class ItemsController : Controller
     public async Task<IActionResult> Edit(EditItemViewModel viewModel)
     {
         if (!ModelState.IsValid)
+        {
+            viewModel.Categories = await BuildCategorySelectListAsync();
             return View(viewModel);
+        }
 
         var dto = _mapper.Map<UpdateItemDto>(viewModel);
 
@@ -121,5 +138,16 @@ public class ItemsController : Controller
             return NotFound();
 
         return RedirectToAction(nameof(Index));
+    }
+
+    private async Task<IEnumerable<SelectListItem>> BuildCategorySelectListAsync()
+    {
+        var categories = await _getCategories.ExecuteAsync();
+
+        return categories.Select(c => new SelectListItem
+        {
+            Value = c.Id.ToString(),
+            Text = c.Name
+        });
     }
 }

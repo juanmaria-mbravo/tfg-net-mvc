@@ -18,12 +18,14 @@ public class ItemRepository : IItemRepository
     {
         return await _context.Items
             .AsNoTracking()
+            .Include(x => x.Category)
             .ToListAsync(cancellationToken);
     }
 
     public async Task<Item?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
         return await _context.Items
+            .Include(x => x.Category)
             .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
     }
 

@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace TfgNetMvc.Web.ViewModels.Items;
 
@@ -13,4 +14,8 @@ public class CreateItemViewModel
 
     [Range(0, int.MaxValue)]
     public int Stock { get; set; }
+
+    public int? CategoryId { get; set; }
+
+    public IEnumerable<SelectListItem> Categories { get; set; } = Enumerable.Empty<SelectListItem>();
 }
