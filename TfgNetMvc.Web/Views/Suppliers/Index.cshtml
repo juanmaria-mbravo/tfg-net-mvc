@@ -1,0 +1,37 @@
+@model List<TfgNetMvc.Web.ViewModels.Suppliers.SupplierListViewModel>
+
+@{
+    ViewData["Title"] = "Suppliers";
+}
+
+<h1>Suppliers</h1>
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">Create new</a>
+</p>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var supplier in Model)
+{
+        <tr>
+            <td>@supplier.Name</td>
+            <td>@supplier.ContactEmail</td>
+            <td>@supplier.Phone</td>
+            <td>
+                <a asp-action="Details" asp-route-id="@supplier.Id">Details</a> |
+                <a asp-action="Edit" asp-route-id="@supplier.Id">Edit</a> |
+                <a asp-action="Delete" asp-route-id="@supplier.Id">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

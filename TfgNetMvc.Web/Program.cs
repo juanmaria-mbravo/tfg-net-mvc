@@ -4,6 +4,9 @@ using TfgNetMvc.Application.Interfaces.Repositories;
 using TfgNetMvc.Infrastructure.Repositories;
 using TfgNetMvc.Application.UseCases.Items;
 using TfgNetMvc.Application.UseCases.Categories;
+using TfgNetMvc.Application.UseCases.Suppliers;
+using TfgNetMvc.Application.UseCases.WarehouseLocations;
+using TfgNetMvc.Application.UseCases.StockMovements;
 using TfgNetMvc.Application.Mapping;
 using TfgNetMvc.Web.Mapping;
 
@@ -34,6 +37,26 @@ builder.Services.AddScoped<GetCategories>();
 builder.Services.AddScoped<GetCategoryById>();
 builder.Services.AddScoped<UpdateCategory>();
 builder.Services.AddScoped<DeleteCategory>();
+
+builder.Services.AddScoped<ISupplierRepository, SupplierRepository>();
+builder.Services.AddScoped<CreateSupplier>();
+builder.Services.AddScoped<GetSuppliers>();
+builder.Services.AddScoped<GetSupplierById>();
+builder.Services.AddScoped<UpdateSupplier>();
+builder.Services.AddScoped<DeleteSupplier>();
+
+builder.Services.AddScoped<IWarehouseLocationRepository, WarehouseLocationRepository>();
+builder.Services.AddScoped<CreateWarehouseLocation>();
+builder.Services.AddScoped<GetWarehouseLocations>();
+builder.Services.AddScoped<GetWarehouseLocationById>();
+builder.Services.AddScoped<UpdateWarehouseLocation>();
+builder.Services.AddScoped<DeleteWarehouseLocation>();
+
+builder.Services.AddScoped<IStockMovementRepository, StockMovementRepository>();
+builder.Services.AddScoped<RegisterStockEntry>();
+builder.Services.AddScoped<RegisterStockExit>();
+builder.Services.AddScoped<GetStockMovements>();
+builder.Services.AddScoped<GetMovementsByItem>();
 
 var app = builder.Build();
 
