@@ -1,4 +1,5 @@
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using TfgNetMvc.Application.DTOs.StockMovements;
@@ -10,6 +11,7 @@ using TfgNetMvc.Web.ViewModels.StockMovements;
 
 namespace TfgNetMvc.Web.Controllers;
 
+[Authorize]
 public class StockMovementsController : Controller
 {
     private readonly GetStockMovements _getStockMovements;
@@ -61,6 +63,7 @@ public class StockMovementsController : Controller
         return View(viewModels);
     }
 
+    [Authorize(Roles = "Admin,Operator")]
     public async Task<IActionResult> RegisterEntry()
     {
         var viewModel = new RegisterStockEntryViewModel
@@ -75,6 +78,7 @@ public class StockMovementsController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [Authorize(Roles = "Admin,Operator")]
     public async Task<IActionResult> RegisterEntry(RegisterStockEntryViewModel viewModel)
     {
         if (!ModelState.IsValid)
@@ -103,6 +107,7 @@ public class StockMovementsController : Controller
         return RedirectToAction(nameof(Index));
     }
 
+    [Authorize(Roles = "Admin,Operator")]
     public async Task<IActionResult> RegisterExit()
     {
         var viewModel = new RegisterStockExitViewModel
@@ -116,6 +121,7 @@ public class StockMovementsController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [Authorize(Roles = "Admin,Operator")]
     public async Task<IActionResult> RegisterExit(RegisterStockExitViewModel viewModel)
     {
         if (!ModelState.IsValid)

@@ -7,7 +7,10 @@
 <h1>Categories</h1>
 
 <p>
-    <a asp-action="Create" class="btn btn-primary">Create new</a>
+    @if (User.IsInRole("Admin"))
+    {
+        <a asp-action="Create" class="btn btn-primary">Create new</a>
+    }
 </p>
 
 <table class="table table-striped">
@@ -25,9 +28,12 @@
             <td>@category.Name</td>
             <td>@category.Description</td>
             <td>
-                <a asp-action="Details" asp-route-id="@category.Id">Details</a> |
-                <a asp-action="Edit" asp-route-id="@category.Id">Edit</a> |
-                <a asp-action="Delete" asp-route-id="@category.Id">Delete</a>
+                <a asp-action="Details" asp-route-id="@category.Id">Details</a>
+                @if (User.IsInRole("Admin"))
+                {
+                    <text> | </text><a asp-action="Edit" asp-route-id="@category.Id">Edit</a>
+                    <text> | </text><a asp-action="Delete" asp-route-id="@category.Id">Delete</a>
+                }
             </td>
         </tr>
 }

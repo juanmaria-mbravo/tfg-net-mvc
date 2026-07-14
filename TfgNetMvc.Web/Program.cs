@@ -1,22 +1,44 @@
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using TfgNetMvc.Infrastructure.Persistence;
 using TfgNetMvc.Application.Interfaces.Repositories;
-using TfgNetMvc.Infrastructure.Repositories;
-using TfgNetMvc.Application.UseCases.Items;
+using TfgNetMvc.Application.Mapping;
 using TfgNetMvc.Application.UseCases.Categories;
+using TfgNetMvc.Application.UseCases.Items;
+using TfgNetMvc.Application.UseCases.StockMovements;
 using TfgNetMvc.Application.UseCases.Suppliers;
 using TfgNetMvc.Application.UseCases.WarehouseLocations;
-using TfgNetMvc.Application.UseCases.StockMovements;
-using TfgNetMvc.Application.Mapping;
+using TfgNetMvc.Infrastructure.Identity;
+using TfgNetMvc.Infrastructure.Persistence;
+using TfgNetMvc.Infrastructure.Repositories;
 using TfgNetMvc.Web.Mapping;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-builder.Services.AddControllersWithViews();
-
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
+    {
+        options.Password.RequireDigit = false;
+        options.Password.RequireLowercase = false;
+        options.Password.RequireUppercase = false;
+        options.Password.RequireNonAlphanumeric = false;
+        options.Password.RequiredLength = 8;
+    })
+    .AddEntityFrameworkStores<AppDbContext>()
+    .AddDefaultUI()
+    .AddDefaultTokenProviders();
+
+builder.Services.AddControllersWithViews();
+builder.Services.AddRazorPages();
+
+builder.Services.AddAuthorization(options =>
+{
+    options.FallbackPolicy = new AuthorizationPolicyBuilder()
+        .RequireAuthenticatedUser()
+        .Build();
+});
 
 builder.Services.AddAutoMapper(cfg =>
 {
@@ -60,7 +82,6 @@ builder.Services.AddScoped<GetMovementsByItem>();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -72,17 +93,23 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
+app.MapRazorPages();
+
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     if (db.Database.IsRelational())
+    {
         db.Database.Migrate();
+        await DataSeeder.SeedAsync(scope.ServiceProvider);
+    }
 }
 
 app.Run();

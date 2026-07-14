@@ -1,4 +1,5 @@
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TfgNetMvc.Application.DTOs.WarehouseLocations;
 using TfgNetMvc.Application.UseCases.WarehouseLocations;
@@ -6,6 +7,7 @@ using TfgNetMvc.Web.ViewModels.WarehouseLocations;
 
 namespace TfgNetMvc.Web.Controllers;
 
+[Authorize]
 public class WarehouseLocationsController : Controller
 {
     private readonly GetWarehouseLocations _getWarehouseLocations;
@@ -51,6 +53,7 @@ public class WarehouseLocationsController : Controller
         return View(viewModel);
     }
 
+    [Authorize(Roles = "Admin")]
     public IActionResult Create()
     {
         return View(new CreateWarehouseLocationViewModel());
@@ -58,6 +61,7 @@ public class WarehouseLocationsController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Create(CreateWarehouseLocationViewModel viewModel)
     {
         if (!ModelState.IsValid)
@@ -70,6 +74,7 @@ public class WarehouseLocationsController : Controller
         return RedirectToAction(nameof(Index));
     }
 
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Edit(int id)
     {
         var location = await _getWarehouseLocationById.ExecuteAsync(id);
@@ -84,6 +89,7 @@ public class WarehouseLocationsController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Edit(EditWarehouseLocationViewModel viewModel)
     {
         if (!ModelState.IsValid)
@@ -99,6 +105,7 @@ public class WarehouseLocationsController : Controller
         return RedirectToAction(nameof(Index));
     }
 
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Delete(int id)
     {
         var location = await _getWarehouseLocationById.ExecuteAsync(id);
@@ -113,6 +120,7 @@ public class WarehouseLocationsController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> DeleteConfirmed(int id)
     {
         var deleted = await _deleteWarehouseLocation.ExecuteAsync(id);

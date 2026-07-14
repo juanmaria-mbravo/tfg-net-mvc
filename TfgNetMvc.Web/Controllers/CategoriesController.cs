@@ -1,4 +1,5 @@
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TfgNetMvc.Application.DTOs.Categories;
 using TfgNetMvc.Application.UseCases.Categories;
@@ -6,6 +7,7 @@ using TfgNetMvc.Web.ViewModels.Categories;
 
 namespace TfgNetMvc.Web.Controllers;
 
+[Authorize]
 public class CategoriesController : Controller
 {
     private readonly GetCategories _getCategories;
@@ -51,6 +53,7 @@ public class CategoriesController : Controller
         return View(viewModel);
     }
 
+    [Authorize(Roles = "Admin")]
     public IActionResult Create()
     {
         return View(new CreateCategoryViewModel());
@@ -58,6 +61,7 @@ public class CategoriesController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Create(CreateCategoryViewModel viewModel)
     {
         if (!ModelState.IsValid)
@@ -70,6 +74,7 @@ public class CategoriesController : Controller
         return RedirectToAction(nameof(Index));
     }
 
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Edit(int id)
     {
         var category = await _getCategoryById.ExecuteAsync(id);
@@ -84,6 +89,7 @@ public class CategoriesController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Edit(EditCategoryViewModel viewModel)
     {
         if (!ModelState.IsValid)
@@ -99,6 +105,7 @@ public class CategoriesController : Controller
         return RedirectToAction(nameof(Index));
     }
 
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Delete(int id)
     {
         var category = await _getCategoryById.ExecuteAsync(id);
@@ -113,6 +120,7 @@ public class CategoriesController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> DeleteConfirmed(int id)
     {
         var deleted = await _deleteCategory.ExecuteAsync(id);

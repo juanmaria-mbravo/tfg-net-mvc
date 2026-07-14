@@ -1,4 +1,5 @@
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using TfgNetMvc.Application.DTOs.Items;
@@ -8,6 +9,7 @@ using TfgNetMvc.Web.ViewModels.Items;
 
 namespace TfgNetMvc.Web.Controllers;
 
+[Authorize]
 public class ItemsController : Controller
 {
     private readonly GetItems _getItems;
@@ -56,6 +58,7 @@ public class ItemsController : Controller
         return View(viewModel);
     }
 
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Create()
     {
         var viewModel = new CreateItemViewModel
@@ -68,6 +71,7 @@ public class ItemsController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Create(CreateItemViewModel viewModel)
     {
         if (!ModelState.IsValid)
@@ -83,6 +87,7 @@ public class ItemsController : Controller
         return RedirectToAction(nameof(Index));
     }
 
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Edit(int id)
     {
         var item = await _getItemById.ExecuteAsync(id);
@@ -98,6 +103,7 @@ public class ItemsController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Edit(EditItemViewModel viewModel)
     {
         if (!ModelState.IsValid)
@@ -116,6 +122,7 @@ public class ItemsController : Controller
         return RedirectToAction(nameof(Index));
     }
 
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Delete(int id)
     {
         var item = await _getItemById.ExecuteAsync(id);
@@ -130,6 +137,7 @@ public class ItemsController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> DeleteConfirmed(int id)
     {
         var deleted = await _deleteItem.ExecuteAsync(id);
