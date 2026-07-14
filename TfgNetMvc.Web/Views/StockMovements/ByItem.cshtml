@@ -1,0 +1,42 @@
+@model List<TfgNetMvc.Web.ViewModels.StockMovements.StockMovementViewModel>
+
+@{
+    ViewData["Title"] = "Stock Movements by Item";
+    var itemName = ViewBag.ItemName as string ?? "Item";
+}
+
+<h1>Stock Movements — @itemName</h1>
+
+<p>
+    <a asp-action="Index" class="btn btn-secondary">Back to all movements</a>
+</p>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Date (UTC)</th>
+            <th>Type</th>
+            <th>Quantity</th>
+            <th>Previous Stock</th>
+            <th>New Stock</th>
+            <th>Supplier</th>
+            <th>Location</th>
+            <th>Reason</th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var movement in Model)
+{
+        <tr>
+            <td>@movement.MovementDateUtc.ToString("yyyy-MM-dd HH:mm")</td>
+            <td>@movement.Type</td>
+            <td>@movement.Quantity</td>
+            <td>@movement.PreviousStock</td>
+            <td>@movement.NewStock</td>
+            <td>@movement.SupplierName</td>
+            <td>@movement.WarehouseLocationName</td>
+            <td>@movement.Reason</td>
+        </tr>
+}
+    </tbody>
+</table>

@@ -8,25 +8,29 @@ public class Item
     public int Stock { get; private set; }
     public int? CategoryId { get; private set; }
     public Category? Category { get; private set; }
+    public int? WarehouseLocationId { get; private set; }
+    public WarehouseLocation? WarehouseLocation { get; private set; }
 
     private Item() { }
 
-    public Item(string name, string? description, int stock, int? categoryId = null)
+    public Item(string name, string? description, int stock, int? categoryId = null, int? warehouseLocationId = null)
     {
         SetName(name);
         SetStock(stock);
 
         Description = description;
         CategoryId = categoryId;
+        WarehouseLocationId = warehouseLocationId;
     }
 
-    public void Update(string name, string? description, int stock, int? categoryId = null)
+    public void Update(string name, string? description, int stock, int? categoryId = null, int? warehouseLocationId = null)
     {
         SetName(name);
         SetStock(stock);
 
         Description = description;
         CategoryId = categoryId;
+        WarehouseLocationId = warehouseLocationId;
     }
 
     public void AddStock(int quantity)
