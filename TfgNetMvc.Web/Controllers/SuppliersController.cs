@@ -1,4 +1,5 @@
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TfgNetMvc.Application.DTOs.Suppliers;
 using TfgNetMvc.Application.UseCases.Suppliers;
@@ -6,6 +7,7 @@ using TfgNetMvc.Web.ViewModels.Suppliers;
 
 namespace TfgNetMvc.Web.Controllers;
 
+[Authorize]
 public class SuppliersController : Controller
 {
     private readonly GetSuppliers _getSuppliers;
@@ -51,6 +53,7 @@ public class SuppliersController : Controller
         return View(viewModel);
     }
 
+    [Authorize(Roles = "Admin")]
     public IActionResult Create()
     {
         return View(new CreateSupplierViewModel());
@@ -58,6 +61,7 @@ public class SuppliersController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Create(CreateSupplierViewModel viewModel)
     {
         if (!ModelState.IsValid)
@@ -70,6 +74,7 @@ public class SuppliersController : Controller
         return RedirectToAction(nameof(Index));
     }
 
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Edit(int id)
     {
         var supplier = await _getSupplierById.ExecuteAsync(id);
@@ -84,6 +89,7 @@ public class SuppliersController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Edit(EditSupplierViewModel viewModel)
     {
         if (!ModelState.IsValid)
@@ -99,6 +105,7 @@ public class SuppliersController : Controller
         return RedirectToAction(nameof(Index));
     }
 
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Delete(int id)
     {
         var supplier = await _getSupplierById.ExecuteAsync(id);
@@ -113,6 +120,7 @@ public class SuppliersController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> DeleteConfirmed(int id)
     {
         var deleted = await _deleteSupplier.ExecuteAsync(id);

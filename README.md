@@ -6,7 +6,7 @@ El objetivo principal del proyecto no es construir una aplicación funcionalment
 
 ## Estado actual
 
-Estado del proyecto: versión `v0.4.0`.
+Estado del proyecto: versión `v0.7.0`.
 
 Actualmente el proyecto incluye:
 
@@ -15,12 +15,17 @@ Actualmente el proyecto incluye:
 - Persistencia con Entity Framework Core Code First.
 - PostgreSQL como proveedor de base de datos.
 - Base de datos de producción en Neon.
-- CRUD funcional de la entidad `Item`.
-- CRUD funcional de la entidad `Category`.
+- CRUD funcional de las entidades `Item`, `Category`, `Supplier` y `WarehouseLocation`.
+- Registro inmutable de movimientos de stock (`StockMovement`): entradas y salidas.
 - Relación opcional entre `Item` y `Category`.
+- Relaciones opcionales entre `StockMovement` y `Supplier`/`WarehouseLocation`.
 - Separación entre entidades de dominio, DTOs de aplicación y ViewModels de presentación.
 - Mapeo entre capas mediante AutoMapper.
 - Validaciones en ViewModels mediante DataAnnotations.
+- Autenticación y autorización basada en roles con ASP.NET Core Identity.
+- Roles: Admin, Operator, Viewer.
+- Política de autorización global: todas las rutas requieren autenticación por defecto.
+- Seed automático de roles y usuario admin desde variables de entorno.
 - Tests unitarios, tests de casos de uso y tests de integración.
 - Pipeline de CI con GitHub Actions.
 - Despliegue continuo en Render mediante Docker.
@@ -51,21 +56,13 @@ Contiene la capa de presentación MVC:
 - Configuración del pipeline HTTP.
 - Configuración de arranque de la aplicación.
 
-Actualmente incluye ViewModels específicos para las entidades `Item` y `Category`.
+ViewModels incluidos:
 
-ViewModels de `Item`:
-
-- `ItemListViewModel`
-- `ItemDetailsViewModel`
-- `CreateItemViewModel`
-- `EditItemViewModel`
-
-ViewModels de `Category`:
-
-- `CategoryListViewModel`
-- `CategoryDetailsViewModel`
-- `CreateCategoryViewModel`
-- `EditCategoryViewModel`
+- `Item`: `ItemListViewModel`, `ItemDetailsViewModel`, `CreateItemViewModel`, `EditItemViewModel`
+- `Category`: `CategoryListViewModel`, `CategoryDetailsViewModel`, `CreateCategoryViewModel`, `EditCategoryViewModel`
+- `Supplier`: `SupplierListViewModel`, `SupplierDetailsViewModel`, `CreateSupplierViewModel`, `EditSupplierViewModel`
+- `WarehouseLocation`: `WarehouseLocationListViewModel`, `WarehouseLocationDetailsViewModel`, `CreateWarehouseLocationViewModel`, `EditWarehouseLocationViewModel`
+- `StockMovement`: `StockMovementViewModel`, `RegisterStockEntryViewModel`, `RegisterStockExitViewModel`
 
 El perfil `ViewModelMappingProfile` centraliza los mapeos entre los DTOs de la capa de aplicación y los ViewModels utilizados por las vistas MVC.
 
@@ -78,33 +75,13 @@ Contiene la lógica de aplicación:
 - Interfaces de repositorios.
 - Perfiles de mapeo entre entidades de dominio y DTOs.
 
-Actualmente incluye casos de uso para la entidad `Item`:
+Casos de uso por entidad:
 
-- `CreateItem`
-- `GetItems`
-- `GetItemById`
-- `UpdateItem`
-- `DeleteItem`
-
-También incluye casos de uso para la entidad `Category`:
-
-- `CreateCategory`
-- `GetCategories`
-- `GetCategoryById`
-- `UpdateCategory`
-- `DeleteCategory`
-
-DTOs de `Item`:
-
-- `ItemDto`
-- `CreateItemDto`
-- `UpdateItemDto`
-
-DTOs de `Category`:
-
-- `CategoryDto`
-- `CreateCategoryDto`
-- `UpdateCategoryDto`
+- `Item`: `CreateItem`, `GetItems`, `GetItemById`, `UpdateItem`, `DeleteItem`
+- `Category`: `CreateCategory`, `GetCategories`, `GetCategoryById`, `UpdateCategory`, `DeleteCategory`
+- `Supplier`: `CreateSupplier`, `GetSuppliers`, `GetSupplierById`, `UpdateSupplier`, `DeleteSupplier`
+- `WarehouseLocation`: `CreateWarehouseLocation`, `GetWarehouseLocations`, `GetWarehouseLocationById`, `UpdateWarehouseLocation`, `DeleteWarehouseLocation`
+- `StockMovement`: `RegisterStockEntry`, `RegisterStockExit`, `GetStockMovements`, `GetMovementsByItem`
 
 El perfil `DtoMappingProfile` centraliza los mapeos entre entidades de dominio y DTOs de aplicación.
 
@@ -112,34 +89,26 @@ El perfil `DtoMappingProfile` centraliza los mapeos entre entidades de dominio y
 
 Contiene las entidades y reglas de negocio independientes de infraestructura.
 
-Actualmente incluye:
+Entidades incluidas:
 
-- Entidad `Item`.
-- Entidad `Category`.
-- Validaciones de nombre.
-- Validaciones de stock en `Item`.
-- Operaciones de dominio como añadir o retirar stock.
-- Relación opcional entre `Item` y `Category`.
-
-La entidad `Item` puede tener una categoría asociada mediante `CategoryId`, pero dicha relación es opcional. Esto permite que existan items sin categoría asignada.
+- `Item`: nombre, descripción, stock. Operaciones `AddStock` y `RemoveStock` con validación de stock negativo.
+- `Category`: nombre, descripción.
+- `Supplier`: nombre, email de contacto, teléfono, notas.
+- `WarehouseLocation`: nombre, descripción.
+- `StockMovement`: entidad inmutable (solo creación, sin modificación ni eliminación). Registra tipo de movimiento (`Entry`/`Exit`), cantidad, stock anterior, stock nuevo, referencia opcional a `Supplier` y `WarehouseLocation`.
 
 ### TfgNetMvc.Infrastructure
 
 Contiene detalles técnicos de infraestructura:
 
-- `AppDbContext`.
+- `AppDbContext`, que hereda de `IdentityDbContext<ApplicationUser>` para integrar las tablas de Identity.
 - Configuración de EF Core.
 - Repositorios concretos.
 - Migraciones.
+- `ApplicationUser` (usuario de Identity).
+- `DataSeeder`: crea los roles y el usuario admin al arrancar desde variables de entorno.
 
-Actualmente incluye:
-
-- `ItemRepository`.
-- `CategoryRepository`.
-- Configuración de la tabla `Items`.
-- Configuración de la tabla `Categories`.
-- Configuración de la relación opcional `Item` -> `Category`.
-- Migración inicial para PostgreSQL.
+Repositorios incluidos: `ItemRepository`, `CategoryRepository`, `SupplierRepository`, `WarehouseLocationRepository`, `StockMovementRepository`.
 
 El proveedor de base de datos utilizado es PostgreSQL mediante `Npgsql.EntityFrameworkCore.PostgreSQL`.
 
@@ -151,11 +120,30 @@ Contiene pruebas automatizadas:
 - Tests de casos de uso.
 - Tests de integración con `WebApplicationFactory`.
 
-Los tests de integración utilizan una configuración específica mediante `CustomWebApplicationFactory`, sustituyendo la base de datos relacional real por EF Core InMemory.
+Los tests de integración utilizan dos fábricas:
+
+- `CustomWebApplicationFactory`: reemplaza la BD por EF Core InMemory y configura un `TestAuthHandler` que autentica las peticiones como Admin. Usado por tests de Items, Categories, etc.
+- `AnonymousWebApplicationFactory`: reemplaza la BD por EF Core InMemory sin override de autenticación. Usado para verificar que rutas protegidas redirigen a Login cuando el usuario es anónimo.
+
+Actualmente el proyecto cuenta con **82 tests correctos**.
+
+## Autorización basada en roles
+
+El proyecto implementa ASP.NET Core Identity con tres roles:
+
+| Rol | Permisos |
+|-----|----------|
+| Admin | CRUD completo de todas las entidades + registro de movimientos |
+| Operator | Lectura de todas las entidades + registro de movimientos de stock |
+| Viewer | Lectura de todas las entidades |
+
+La política de autorización es **global**: todas las rutas requieren autenticación por defecto. Solo la página de inicio (`/`) tiene `[AllowAnonymous]`.
+
+Las vistas ocultan los botones de creación, edición y eliminación a los usuarios sin el rol Admin.
 
 ## Patrón aplicado al CRUD
 
-Las entidades `Item` y `Category` se implementan siguiendo una separación explícita entre capas:
+Las entidades se implementan siguiendo una separación explícita entre capas:
 
 ```text
 Views
@@ -182,61 +170,7 @@ Las vistas MVC no trabajan directamente con entidades de dominio ni con DTOs de 
 
 Los casos de uso reciben y devuelven DTOs, manteniendo la capa Application desacoplada de los modelos de presentación.
 
-Los repositorios se definen mediante interfaces en Application y se implementan en Infrastructure. De esta forma, la lógica de aplicación no depende directamente de EF Core ni del DbContext.
-
-## Patrón aplicado al CRUD de Items
-
-La vista `Index` de Items utiliza específicamente:
-
-```csharp
-@model List<TfgNetMvc.Web.ViewModels.Items.ItemListViewModel>
-```
-
-El listado de Items muestra los campos:
-
-- `Name`
-- `Description`
-- `Stock`
-- `Category`
-
-Las vistas de creación y edición utilizan ViewModels con validaciones mediante DataAnnotations. Los formularios están enlazados mediante Tag Helpers (`asp-for`) para mantener una relación explícita entre la vista y el ViewModel correspondiente.
-
-La creación y edición de Items permite seleccionar una categoría mediante un desplegable. La relación con Category es opcional.
-
-## Patrón aplicado al CRUD de Categories
-
-La vista `Index` de Categories utiliza específicamente:
-
-```csharp
-@model List<TfgNetMvc.Web.ViewModels.Categories.CategoryListViewModel>
-```
-
-El listado de Categories muestra los campos:
-
-- `Name`
-- `Description`
-
-Las vistas de creación y edición utilizan ViewModels con validaciones mediante DataAnnotations. Los formularios están enlazados mediante Tag Helpers (`asp-for`) siguiendo el mismo patrón aplicado a Items.
-
-## Relación entre Item y Category
-
-La relación entre `Item` y `Category` es opcional:
-
-```text
-Category 1 -> N Items
-Item 0..1 -> Category
-```
-
-A nivel de modelo, `Item` contiene:
-
-```csharp
-public int? CategoryId { get; private set; }
-public Category? Category { get; private set; }
-```
-
-La clave foránea `CategoryId` es nullable. Esto permite que un Item exista sin categoría asociada.
-
-En EF Core, la relación se configura de forma que, al eliminar una Category, los Items asociados no se eliminan. En su lugar, su `CategoryId` pasa a `null`. Esta decisión evita pérdidas accidentales de datos y mantiene la independencia entre la gestión de Items y Categories.
+Los repositorios se definen mediante interfaces en Application y se implementan en Infrastructure.
 
 ## Requisitos técnicos
 
@@ -284,7 +218,7 @@ La cadena de conexión base se encuentra en `TfgNetMvc.Web/appsettings.json` con
 }
 ```
 
-Para desarrollo local, se utiliza `TfgNetMvc.Web/appsettings.Development.json` con la password real del PostgreSQL local. Este archivo está excluido del repositorio mediante `.gitignore`.
+Para desarrollo local, se utiliza `TfgNetMvc.Web/appsettings.Development.json` con la password real del PostgreSQL local y las credenciales del usuario admin de seed. Este archivo está excluido del repositorio mediante `.gitignore`.
 
 Ejemplo de estructura local:
 
@@ -292,11 +226,15 @@ Ejemplo de estructura local:
 {
   "ConnectionStrings": {
     "DefaultConnection": "Host=localhost;Database=TfgNetMvcDb;Username=postgres;Password=your-local-password"
+  },
+  "SeedAdmin": {
+    "Email": "admin@example.com",
+    "Password": "your-admin-password"
   }
 }
 ```
 
-La aplicación aplica automáticamente las migraciones pendientes al arrancar cuando el proveedor de base de datos es relacional.
+La aplicación aplica automáticamente las migraciones pendientes y ejecuta el seed de roles y usuario admin al arrancar cuando el proveedor de base de datos es relacional.
 
 También se pueden aplicar migraciones manualmente con:
 
@@ -314,15 +252,9 @@ En Render, la cadena de conexión se configura mediante variable de entorno:
 ConnectionStrings__DefaultConnection
 ```
 
-ASP.NET Core interpreta el doble guión bajo (`__`) como jerarquía de configuración, por lo que esta variable equivale a:
-
-```text
-ConnectionStrings:DefaultConnection
-```
+ASP.NET Core interpreta el doble guión bajo (`__`) como jerarquía de configuración.
 
 La connection string real de Neon no se almacena en el repositorio. Se gestiona exclusivamente desde las variables de entorno del servicio en Render.
-
-Con esta configuración, el despliegue en Render utiliza Neon como base de datos de producción y aplica las migraciones automáticamente al arrancar la aplicación.
 
 ## Gestión de credenciales
 
@@ -333,11 +265,13 @@ appsettings.json
   -> valores base y placeholders sin credenciales reales
 
 appsettings.Development.json
-  -> configuración local con password real
+  -> configuración local con password real de PostgreSQL y credenciales de seed
   -> excluido del repositorio mediante .gitignore
 
 Variables de entorno en Render
-  -> connection string real de Neon
+  -> ConnectionStrings__DefaultConnection  (connection string de Neon)
+  -> SeedAdmin__Email                      (email del usuario admin inicial)
+  -> SeedAdmin__Password                   (password del usuario admin inicial)
   -> no se almacenan en el repositorio
 ```
 
@@ -349,22 +283,11 @@ El proyecto incluye distintos niveles de pruebas.
 
 ### Tests unitarios de dominio
 
-Validan reglas de negocio de las entidades `Item` y `Category`, como:
-
-- Creación con datos válidos.
-- Rechazo de nombre vacío.
-- Rechazo de stock negativo en `Item`.
-- Incremento y decremento de stock.
-- Actualización de entidades.
-- Validación de nombres con espacios.
+Validan reglas de negocio de las entidades `Item`, `Category`, `Supplier`, `WarehouseLocation` y `StockMovement`.
 
 ### Tests de Application
 
-Validan los casos de uso utilizando repositorios fake en memoria.
-
-Esto permite probar la lógica de aplicación sin depender de PostgreSQL ni de EF Core.
-
-Los casos de uso trabajan con DTOs de entrada y salida, lo que permite validar la lógica de aplicación sin acoplarla a los ViewModels de la capa Web.
+Validan los casos de uso utilizando repositorios fake en memoria. Esto permite probar la lógica de aplicación sin depender de PostgreSQL ni de EF Core.
 
 ### Tests de integración
 
@@ -376,11 +299,9 @@ Para permitir estos tests, `Program.cs` incluye una declaración parcial públic
 public partial class Program { }
 ```
 
-En el entorno de integración continua, estos tests utilizan una configuración específica mediante `CustomWebApplicationFactory`, sustituyendo la conexión real a PostgreSQL por una base de datos en memoria con EF Core InMemory. Esto permite ejecutar los tests de integración en GitHub Actions sin depender de infraestructura externa.
+Los tests de integración utilizan EF Core InMemory en lugar de PostgreSQL real, y `TestAuthHandler` para simular un usuario autenticado con rol Admin. Adicionalmente, se valida que las rutas protegidas redirigen a Login cuando el usuario es anónimo.
 
-La aplicación incorpora startup migration automática, pero esta solo se ejecuta con proveedores relacionales gracias a la comprobación `Database.IsRelational()`. Por ello, los tests de integración con EF Core InMemory siguen funcionando correctamente.
-
-Actualmente el proyecto cuenta con 36 tests correctos.
+La startup migration automática solo se ejecuta con proveedores relacionales gracias a la comprobación `Database.IsRelational()`, por lo que los tests con EF Core InMemory siguen funcionando correctamente.
 
 ## CI/CD
 
@@ -396,9 +317,7 @@ El workflow se ejecuta sobre las ramas principales del proyecto.
 
 ### Despliegue continuo
 
-Inicialmente se intentó desplegar en Azure App Service, pero la suscripción académica Azure for Students aplicaba restricciones de directivas que impedían crear los recursos necesarios.
-
-Como alternativa, se implementó despliegue continuo mediante:
+El despliegue continuo se realiza mediante:
 
 - Render.
 - Docker.
@@ -407,7 +326,7 @@ Como alternativa, se implementó despliegue continuo mediante:
 
 Render construye la imagen Docker a partir del repositorio y despliega automáticamente desde la rama `develop`.
 
-Durante el arranque, la aplicación aplica las migraciones pendientes contra la base de datos PostgreSQL configurada mediante variable de entorno.
+Durante el arranque, la aplicación aplica las migraciones pendientes y ejecuta el seed de roles y usuario admin.
 
 URL actual:
 
@@ -417,10 +336,10 @@ https://tfg-net-mvc.onrender.com
 
 ## Limitaciones actuales
 
-- PostgreSQL local está preparado a nivel de configuración, pero requiere tener PostgreSQL instalado en la máquina local y configurar la password real en `appsettings.Development.json`.
+- PostgreSQL local requiere tener PostgreSQL instalado y configurar las credenciales en `appsettings.Development.json`.
 - La base de datos de producción utiliza Neon en modalidad gratuita, por lo que puede tener limitaciones propias del plan gratuito.
 - Docker no se pudo validar localmente por problemas de Docker Desktop/WSL en Windows, pero el build Docker fue validado correctamente en Render.
-- La memoria final en LaTeX está pendiente de elaboración.
+- La memoria final en LaTeX está en elaboración.
 
 ## Flujo de ramas
 
@@ -443,10 +362,7 @@ Actualmente Render despliega desde `develop`.
 Las versiones estables se publican en `main` mediante etiquetas semánticas:
 
 ```text
-v0.1.0
-v0.2.0
-v0.3.0
-v0.4.0
+v0.1.0  v0.2.0  v0.3.0  v0.4.0  v0.5.0  v0.6.0  v0.7.0
 ```
 
 ## Versiones
@@ -472,14 +388,11 @@ Incluye:
 
 - DTOs en la capa Application.
 - ViewModels en la capa Web.
-- AutoMapper 16.1.1.
-- `DtoMappingProfile`.
-- `ViewModelMappingProfile`.
+- AutoMapper.
+- `DtoMappingProfile` y `ViewModelMappingProfile`.
 - Adaptación del `ItemsController` para trabajar con ViewModels y mapear hacia DTOs.
-- Adaptación de vistas para trabajar con ViewModels tipados.
 - Validaciones mediante DataAnnotations en ViewModels.
 - Formularios enlazados mediante Tag Helpers (`asp-for`).
-- Inclusión de `Description` en `ItemListViewModel` y en el listado de Items.
 
 ### v0.3.0
 
@@ -489,12 +402,10 @@ Incluye:
 
 - Entidad `Category`.
 - CRUD completo de `Category`.
-- DTOs, ViewModels, repositorio, casos de uso, controlador y vistas para `Category`.
 - Relación opcional entre `Item` y `Category`.
 - Selector de categorías en creación y edición de Items.
-- Actualización de `ItemDto` y ViewModels de Item para mostrar la categoría.
 - Nueva migración EF Core para Categories y la relación con Items.
-- Ampliación de tests hasta 36 tests correctos.
+- 36 tests correctos.
 
 ### v0.4.0
 
@@ -506,28 +417,46 @@ Incluye:
 - Uso de `Npgsql.EntityFrameworkCore.PostgreSQL`.
 - Configuración de Neon como base de datos de producción.
 - Configuración de connection string mediante variable de entorno en Render.
-- Exclusión de `appsettings.Development.json` del repositorio.
-- Regeneración de migraciones EF Core para PostgreSQL.
 - Startup migration automática con comprobación `Database.IsRelational()`.
 - `/Items` y `/Categories` funcionales en producción con persistencia real.
 
-## Próximos pasos
+### v0.5.0
 
-Tras `v0.4.0`, el proyecto dispone de una base técnica completa:
+Versión centrada en documentación y configuración del entorno.
 
-- Arquitectura por capas.
-- Dos entidades con CRUD completo.
-- Relación entre entidades.
-- DTOs, ViewModels y AutoMapper.
-- EF Core con PostgreSQL.
-- Base de datos de producción en Neon.
-- CI/CD con GitHub Actions, Docker y Render.
-- Persistencia real en producción.
-- 36 tests automatizados.
+Incluye:
 
-Los siguientes pasos se centran en:
+- README actualizado al estado real del proyecto.
+- `appsettings.Development.json` excluido del repositorio mediante `.gitignore`.
 
-- Revisar documentación final del repositorio.
-- Elaborar la memoria final del TFG en LaTeX.
-- Consolidar los documentos técnicos incrementales generados durante el desarrollo.
-- Preparar la defensa y explicación de decisiones técnicas.
+### v0.6.0
+
+Versión centrada en la expansión del dominio de inventario.
+
+Incluye:
+
+- Entidad `Supplier` con CRUD completo.
+- Entidad `WarehouseLocation` con CRUD completo.
+- Entidad `StockMovement` inmutable (solo creación, sin edición ni eliminación).
+- Casos de uso `RegisterStockEntry` y `RegisterStockExit` que coordinan `IItemRepository` e `IStockMovementRepository`.
+- Relaciones opcionales entre `StockMovement` y `Supplier`/`WarehouseLocation`.
+- Vista de movimientos filtrada por item (`/StockMovements/ByItem?itemId=`).
+- 76 tests correctos.
+
+### v0.7.0
+
+Versión centrada en autenticación y autorización basada en roles.
+
+Incluye:
+
+- ASP.NET Core Identity con `IdentityDbContext<ApplicationUser>`.
+- Tres roles: Admin, Operator, Viewer.
+- Política de autorización global (`FallbackPolicy`) que requiere autenticación en todas las rutas.
+- `[AllowAnonymous]` exclusivamente en la página de inicio.
+- Autorización granular por rol en cada controlador: Admin para CRUD, Admin+Operator para registro de movimientos.
+- `DataSeeder` idempotente: crea roles y usuario admin al arrancar desde variables de entorno `SeedAdmin__Email` y `SeedAdmin__Password`.
+- Migración `AddIdentityAuthentication` con las tablas de Identity.
+- Navbar adaptado: muestra los enlaces solo cuando el usuario está autenticado, con opción de Login/Logout.
+- Vistas adaptadas: botones de creación, edición y eliminación visibles solo para Admin.
+- `TestAuthHandler` y `AnonymousWebApplicationFactory` para mantener los tests de integración funcionando.
+- 82 tests correctos.

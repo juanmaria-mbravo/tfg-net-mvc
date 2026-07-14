@@ -1,10 +1,12 @@
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using TfgNetMvc.Domain.Entities;
 using TfgNetMvc.Domain.Enums;
+using TfgNetMvc.Infrastructure.Identity;
 
 namespace TfgNetMvc.Infrastructure.Persistence;
 
-public class AppDbContext : DbContext
+public class AppDbContext : IdentityDbContext<ApplicationUser>
 {
     public DbSet<Item> Items => Set<Item>();
     public DbSet<Category> Categories => Set<Category>();
@@ -19,6 +21,8 @@ public class AppDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        base.OnModelCreating(modelBuilder);
+
         modelBuilder.Entity<Item>(entity =>
         {
             entity.ToTable("Items");
