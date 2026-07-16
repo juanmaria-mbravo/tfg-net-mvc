@@ -13,7 +13,8 @@ public class DtoMappingProfile : Profile
     public DtoMappingProfile()
     {
         CreateMap<Item, ItemDto>()
-            .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category != null ? src.Category.Name : null));
+            .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category != null ? src.Category.Name : null))
+            .ForMember(dest => dest.WarehouseLocationName, opt => opt.MapFrom(src => src.WarehouseLocation != null ? src.WarehouseLocation.Name : null));
         CreateMap<Category, CategoryDto>();
         CreateMap<Supplier, SupplierDto>();
         CreateMap<WarehouseLocation, WarehouseLocationDto>();

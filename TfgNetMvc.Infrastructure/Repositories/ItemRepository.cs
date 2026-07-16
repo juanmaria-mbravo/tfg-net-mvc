@@ -19,6 +19,7 @@ public class ItemRepository : IItemRepository
         return await _context.Items
             .AsNoTracking()
             .Include(x => x.Category)
+            .Include(x => x.WarehouseLocation)
             .ToListAsync(cancellationToken);
     }
 
@@ -26,6 +27,7 @@ public class ItemRepository : IItemRepository
     {
         return await _context.Items
             .Include(x => x.Category)
+            .Include(x => x.WarehouseLocation)
             .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
     }
 

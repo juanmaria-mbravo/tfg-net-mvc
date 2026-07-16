@@ -14,10 +14,11 @@ public class EditItemViewModel
     [StringLength(500)]
     public string? Description { get; set; }
 
-    [Range(0, int.MaxValue)]
-    public int Stock { get; set; }
-
     public int? CategoryId { get; set; }
 
     public IEnumerable<SelectListItem> Categories { get; set; } = Enumerable.Empty<SelectListItem>();
+
+    public int? WarehouseLocationId { get; set; }
+
+    public IEnumerable<SelectListItem> WarehouseLocations { get; set; } = Enumerable.Empty<SelectListItem>();
 }
