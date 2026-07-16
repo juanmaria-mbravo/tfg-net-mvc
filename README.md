@@ -6,7 +6,7 @@ El objetivo principal del proyecto no es construir una aplicación funcionalment
 
 ## Estado actual
 
-Estado del proyecto: versión `v0.7.2`.
+Estado del proyecto: versión `v0.7.3`.
 
 Actualmente el proyecto incluye:
 
@@ -93,7 +93,7 @@ Contiene las entidades y reglas de negocio independientes de infraestructura.
 
 Entidades incluidas:
 
-- `Item`: nombre, descripción, stock, categoría opcional y ubicación de almacén opcional. Operaciones `AddStock` y `RemoveStock` con validación de stock negativo.
+- `Item`: nombre, descripción, stock, categoría opcional y ubicación de almacén opcional. El stock solo puede modificarse mediante `AddStock` y `RemoveStock`; `Update()` no acepta parámetro de stock.
 - `Category`: nombre, descripción.
 - `Supplier`: nombre, email de contacto, teléfono, notas.
 - `WarehouseLocation`: nombre, descripción.
@@ -364,7 +364,7 @@ Actualmente Render despliega desde `develop`.
 Las versiones estables se publican en `main` mediante etiquetas semánticas:
 
 ```text
-v0.1.0  v0.2.0  v0.3.0  v0.4.0  v0.5.0  v0.6.0  v0.7.0  v0.7.1  v0.7.2
+v0.1.0  v0.2.0  v0.3.0  v0.4.0  v0.5.0  v0.6.0  v0.7.0  v0.7.1  v0.7.2  v0.7.3
 ```
 
 ## Versiones
@@ -482,4 +482,17 @@ Incluye:
 - Selector de ubicación de almacén en los formularios de creación y edición de artículos.
 - Columna `Location` en el listado de artículos y campo `Location` en la vista de detalle.
 - Eliminación del campo `Stock` del formulario de edición de artículos: el stock solo puede modificarse mediante `RegisterStockEntry` y `RegisterStockExit`.
+- 84 tests correctos.
+
+### v0.7.3
+
+Versión correctiva del invariante de stock en el dominio.
+
+Incluye:
+
+- Eliminación del parámetro `stock` de `Item.Update()`: el contrato del dominio ya no permite modificar el stock desde la operación de actualización.
+- El stock de un artículo solo puede cambiar mediante `AddStock()` y `RemoveStock()`, que son invocados exclusivamente por `RegisterStockEntry` y `RegisterStockExit`.
+- Adaptación del caso de uso `UpdateItem` y de los tests de dominio.
+- Test nuevo `Update_StockRemainsUnchanged` que documenta el invariante explícitamente.
+- Sin cambios en el esquema de base de datos.
 - 84 tests correctos.
