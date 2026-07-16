@@ -8,4 +8,6 @@ public class ItemDto
     public int Stock { get; set; }
     public int? CategoryId { get; set; }
     public string? CategoryName { get; set; }
+    public int? WarehouseLocationId { get; set; }
+    public string? WarehouseLocationName { get; set; }
 }

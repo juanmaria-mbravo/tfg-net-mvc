@@ -18,4 +18,8 @@ public class CreateItemViewModel
     public int? CategoryId { get; set; }
 
     public IEnumerable<SelectListItem> Categories { get; set; } = Enumerable.Empty<SelectListItem>();
+
+    public int? WarehouseLocationId { get; set; }
+
+    public IEnumerable<SelectListItem> WarehouseLocations { get; set; } = Enumerable.Empty<SelectListItem>();
 }

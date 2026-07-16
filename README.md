@@ -6,7 +6,7 @@ El objetivo principal del proyecto no es construir una aplicación funcionalment
 
 ## Estado actual
 
-Estado del proyecto: versión `v0.7.0`.
+Estado del proyecto: versión `v0.7.2`.
 
 Actualmente el proyecto incluye:
 
@@ -18,7 +18,9 @@ Actualmente el proyecto incluye:
 - CRUD funcional de las entidades `Item`, `Category`, `Supplier` y `WarehouseLocation`.
 - Registro inmutable de movimientos de stock (`StockMovement`): entradas y salidas.
 - Relación opcional entre `Item` y `Category`.
+- Relación opcional entre `Item` y `WarehouseLocation`.
 - Relaciones opcionales entre `StockMovement` y `Supplier`/`WarehouseLocation`.
+- El stock de un artículo solo puede modificarse mediante `RegisterStockEntry` y `RegisterStockExit`, garantizando trazabilidad completa en `StockMovement`.
 - Separación entre entidades de dominio, DTOs de aplicación y ViewModels de presentación.
 - Mapeo entre capas mediante AutoMapper.
 - Validaciones en ViewModels mediante DataAnnotations.
@@ -91,7 +93,7 @@ Contiene las entidades y reglas de negocio independientes de infraestructura.
 
 Entidades incluidas:
 
-- `Item`: nombre, descripción, stock. Operaciones `AddStock` y `RemoveStock` con validación de stock negativo.
+- `Item`: nombre, descripción, stock, categoría opcional y ubicación de almacén opcional. Operaciones `AddStock` y `RemoveStock` con validación de stock negativo.
 - `Category`: nombre, descripción.
 - `Supplier`: nombre, email de contacto, teléfono, notas.
 - `WarehouseLocation`: nombre, descripción.
@@ -125,7 +127,7 @@ Los tests de integración utilizan dos fábricas:
 - `CustomWebApplicationFactory`: reemplaza la BD por EF Core InMemory y configura un `TestAuthHandler` que autentica las peticiones como Admin. Usado por tests de Items, Categories, etc.
 - `AnonymousWebApplicationFactory`: reemplaza la BD por EF Core InMemory sin override de autenticación. Usado para verificar que rutas protegidas redirigen a Login cuando el usuario es anónimo.
 
-Actualmente el proyecto cuenta con **82 tests correctos**.
+Actualmente el proyecto cuenta con **84 tests correctos**.
 
 ## Autorización basada en roles
 
@@ -362,7 +364,7 @@ Actualmente Render despliega desde `develop`.
 Las versiones estables se publican en `main` mediante etiquetas semánticas:
 
 ```text
-v0.1.0  v0.2.0  v0.3.0  v0.4.0  v0.5.0  v0.6.0  v0.7.0
+v0.1.0  v0.2.0  v0.3.0  v0.4.0  v0.5.0  v0.6.0  v0.7.0  v0.7.1  v0.7.2
 ```
 
 ## Versiones
@@ -460,3 +462,24 @@ Incluye:
 - Vistas adaptadas: botones de creación, edición y eliminación visibles solo para Admin.
 - `TestAuthHandler` y `AnonymousWebApplicationFactory` para mantener los tests de integración funcionando.
 - 82 tests correctos.
+
+### v0.7.1
+
+Versión correctiva del formulario de inicio de sesión.
+
+Incluye:
+
+- Corrección de la página de login: la partial de Identity no se renderizaba correctamente en la vista de inicio de sesión.
+- Sin cambios funcionales en el dominio ni en los casos de uso.
+
+### v0.7.2
+
+Versión centrada en correcciones de coherencia entre el dominio y la capa de presentación.
+
+Incluye:
+
+- Cableado completo de `WarehouseLocationId` en `Item` a través de todas las capas: DTOs, casos de uso, perfil de mapeo, ViewModels, controlador, vistas y repositorio.
+- Selector de ubicación de almacén en los formularios de creación y edición de artículos.
+- Columna `Location` en el listado de artículos y campo `Location` en la vista de detalle.
+- Eliminación del campo `Stock` del formulario de edición de artículos: el stock solo puede modificarse mediante `RegisterStockEntry` y `RegisterStockExit`.
+- 84 tests correctos.
