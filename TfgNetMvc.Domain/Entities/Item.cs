@@ -23,10 +23,9 @@ public class Item
         WarehouseLocationId = warehouseLocationId;
     }
 
-    public void Update(string name, string? description, int stock, int? categoryId = null, int? warehouseLocationId = null)
+    public void Update(string name, string? description, int? categoryId = null, int? warehouseLocationId = null)
     {
         SetName(name);
-        SetStock(stock);
 
         Description = description;
         CategoryId = categoryId;

@@ -19,7 +19,7 @@ public class UpdateItem
         if (item is null)
             return false;
 
-        item.Update(dto.Name, dto.Description, item.Stock, dto.CategoryId, dto.WarehouseLocationId);
+        item.Update(dto.Name, dto.Description, dto.CategoryId, dto.WarehouseLocationId);
 
         _repository.Update(item);
         await _repository.SaveChangesAsync(cancellationToken);

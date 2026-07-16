@@ -71,19 +71,19 @@ public class ItemTests
     {
         var item = new Item("Laptop", "Description", 10);
 
-        item.Update("Monitor", "Updated description", 5);
+        item.Update("Monitor", "Updated description");
 
         Assert.Equal("Monitor", item.Name);
         Assert.Equal("Updated description", item.Description);
-        Assert.Equal(5, item.Stock);
     }
 
     [Fact]
-    public void Update_WithNegativeStock_ShouldThrowArgumentException()
+    public void Update_StockRemainsUnchanged()
     {
         var item = new Item("Laptop", "Description", 10);
 
-        Assert.Throws<ArgumentException>(() =>
-            item.Update("Laptop", "Description", -1));
+        item.Update("Monitor", "Updated description");
+
+        Assert.Equal(10, item.Stock);
     }
 }
