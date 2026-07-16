@@ -22,8 +22,7 @@ public class UpdateItemTests
         {
             Id = existingItem.Id,
             Name = "Updated item",
-            Description = "Updated description",
-            Stock = 20
+            Description = "Updated description"
         };
 
         var result = await useCase.ExecuteAsync(dto);
@@ -34,7 +33,7 @@ public class UpdateItemTests
         Assert.NotNull(updatedItem);
         Assert.Equal("Updated item", updatedItem.Name);
         Assert.Equal("Updated description", updatedItem.Description);
-        Assert.Equal(20, updatedItem.Stock);
+        Assert.Equal(5, updatedItem.Stock);
     }
 
     [Fact]
@@ -47,8 +46,7 @@ public class UpdateItemTests
         {
             Id = 999,
             Name = "Updated item",
-            Description = "Updated description",
-            Stock = 20
+            Description = "Updated description"
         };
 
         var result = await useCase.ExecuteAsync(dto);

@@ -30,6 +30,47 @@ public class CreateItemTests
     }
 
     [Fact]
+    public async Task ExecuteAsync_WithWarehouseLocationId_AssignsLocation()
+    {
+        var repository = new FakeItemRepository();
+        var useCase = new CreateItem(repository);
+
+        var dto = new CreateItemDto
+        {
+            Name = "Shelf item",
+            Description = null,
+            Stock = 5,
+            WarehouseLocationId = 3
+        };
+
+        var id = await useCase.ExecuteAsync(dto);
+        var createdItem = await repository.GetByIdAsync(id);
+
+        Assert.NotNull(createdItem);
+        Assert.Equal(3, createdItem.WarehouseLocationId);
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_WithoutWarehouseLocationId_LocationIsNull()
+    {
+        var repository = new FakeItemRepository();
+        var useCase = new CreateItem(repository);
+
+        var dto = new CreateItemDto
+        {
+            Name = "Unlocated item",
+            Description = null,
+            Stock = 2
+        };
+
+        var id = await useCase.ExecuteAsync(dto);
+        var createdItem = await repository.GetByIdAsync(id);
+
+        Assert.NotNull(createdItem);
+        Assert.Null(createdItem.WarehouseLocationId);
+    }
+
+    [Fact]
     public async Task ExecuteAsync_WithEmptyName_ThrowsArgumentException()
     {
         var repository = new FakeItemRepository();

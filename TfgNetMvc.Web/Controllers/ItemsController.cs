@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using TfgNetMvc.Application.DTOs.Items;
 using TfgNetMvc.Application.UseCases.Categories;
 using TfgNetMvc.Application.UseCases.Items;
+using TfgNetMvc.Application.UseCases.WarehouseLocations;
 using TfgNetMvc.Web.ViewModels.Items;
 
 namespace TfgNetMvc.Web.Controllers;
@@ -18,6 +19,7 @@ public class ItemsController : Controller
     private readonly UpdateItem _updateItem;
     private readonly DeleteItem _deleteItem;
     private readonly GetCategories _getCategories;
+    private readonly GetWarehouseLocations _getWarehouseLocations;
     private readonly IMapper _mapper;
 
     public ItemsController(
@@ -27,6 +29,7 @@ public class ItemsController : Controller
         UpdateItem updateItem,
         DeleteItem deleteItem,
         GetCategories getCategories,
+        GetWarehouseLocations getWarehouseLocations,
         IMapper mapper)
     {
         _getItems = getItems;
@@ -35,6 +38,7 @@ public class ItemsController : Controller
         _updateItem = updateItem;
         _deleteItem = deleteItem;
         _getCategories = getCategories;
+        _getWarehouseLocations = getWarehouseLocations;
         _mapper = mapper;
     }
 
@@ -63,7 +67,8 @@ public class ItemsController : Controller
     {
         var viewModel = new CreateItemViewModel
         {
-            Categories = await BuildCategorySelectListAsync()
+            Categories = await BuildCategorySelectListAsync(),
+            WarehouseLocations = await BuildWarehouseLocationSelectListAsync()
         };
 
         return View(viewModel);
@@ -77,6 +82,7 @@ public class ItemsController : Controller
         if (!ModelState.IsValid)
         {
             viewModel.Categories = await BuildCategorySelectListAsync();
+            viewModel.WarehouseLocations = await BuildWarehouseLocationSelectListAsync();
             return View(viewModel);
         }
 
@@ -97,6 +103,7 @@ public class ItemsController : Controller
 
         var viewModel = _mapper.Map<EditItemViewModel>(item);
         viewModel.Categories = await BuildCategorySelectListAsync();
+        viewModel.WarehouseLocations = await BuildWarehouseLocationSelectListAsync();
 
         return View(viewModel);
     }
@@ -109,6 +116,7 @@ public class ItemsController : Controller
         if (!ModelState.IsValid)
         {
             viewModel.Categories = await BuildCategorySelectListAsync();
+            viewModel.WarehouseLocations = await BuildWarehouseLocationSelectListAsync();
             return View(viewModel);
         }
 
@@ -156,6 +164,17 @@ public class ItemsController : Controller
         {
             Value = c.Id.ToString(),
             Text = c.Name
+        });
+    }
+
+    private async Task<IEnumerable<SelectListItem>> BuildWarehouseLocationSelectListAsync()
+    {
+        var locations = await _getWarehouseLocations.ExecuteAsync();
+
+        return locations.Select(l => new SelectListItem
+        {
+            Value = l.Id.ToString(),
+            Text = l.Name
         });
     }
 }

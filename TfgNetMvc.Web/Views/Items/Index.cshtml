@@ -20,6 +20,7 @@
             <th>Description</th>
             <th>Stock</th>
             <th>Category</th>
+            <th>Location</th>
             <th></th>
         </tr>
     </thead>
@@ -31,6 +32,7 @@
             <td>@item.Description</td>
             <td>@item.Stock</td>
             <td>@item.CategoryName</td>
+            <td>@item.WarehouseLocationName</td>
             <td>
                 <a asp-action="Details" asp-route-id="@item.Id">Details</a>
                 @if (User.IsInRole("Admin"))
